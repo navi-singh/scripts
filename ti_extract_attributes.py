@@ -3,6 +3,14 @@ from datetime import datetime
 import requests
 
 
+
+def check_autopilot(data):
+    # Assuming data is a dictionary parsed from a JSON object
+    if 'AUTOPILOT' in data and isinstance(data['AUTOPILOT'], list):
+        if "AUTOPILOT_FULL_SELF_DRIVING" in data['AUTOPILOT']:
+            return "yes"
+    return "no"
+    
 # Open the JSON file
 # with open('/Users/nmehrok/Desktop/python/t_res.json') as file:
 #     data = json.load(file)
@@ -86,9 +94,3 @@ with open(output_file, 'w') as t_out_file:
 with open(output_file, 'a') as file:
     file.write(existing_content + '\n')
 
-def check_autopilot(data):
-    # Assuming data is a dictionary parsed from a JSON object
-    if 'AUTOPILOT' in data and isinstance(data['AUTOPILOT'], list):
-        if "AUTOPILOT_FULL_SELF_DRIVING" in data['AUTOPILOT']:
-            return "yes"
-    return "no"
