@@ -69,6 +69,7 @@ with open(output_file, 'w') as t_out_file:
     for result in data['results']:
         # Extract the required attributes
         vin = result['VIN']
+        result['AUTOPILOT']
 
         # actual_ga_in_date = result['ActualGAInDate']
         warranty_vehicle = f"{convert_date(result['WarrantyData']['WarrantyVehicleExpDate'])} -> {convert_date(result['WarrantyData']['WarrantyBatteryExpDate'])}"
@@ -76,11 +77,18 @@ with open(output_file, 'w') as t_out_file:
         transportation_fee = result['TransportationFee']
         odometer = result['Odometer']
         link = f"https://www.tesla.com/my/order/{vin}#overview"
-
-        output_string = f"{vin}\t{warranty_vehicle}\t{est_total_cost}\t{transportation_fee}\t{transportation_fee + est_total_cost}\t{odometer}\t{link}"
+        isFSD = check_autopilot(result)
+        output_string = f"{vin}\t{warranty_vehicle}\t{est_total_cost}\t{transportation_fee}\t{transportation_fee + est_total_cost}\t{odometer}\t{link}\t{isFSD}"
         t_out_file.write(output_string + '\n')
 
         # Print the extracted attributes
         print(output_string)
 with open(output_file, 'a') as file:
     file.write(existing_content + '\n')
+
+def check_autopilot(data):
+    # Assuming data is a dictionary parsed from a JSON object
+    if 'AUTOPILOT' in data and isinstance(data['AUTOPILOT'], list):
+        if "AUTOPILOT_FULL_SELF_DRIVING" in data['AUTOPILOT']:
+            return "yes"
+    return "no"
