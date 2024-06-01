@@ -86,7 +86,7 @@ with open(output_file, 'w') as t_out_file:
         odometer = result['Odometer']
         link = f"https://www.tesla.com/my/order/{vin}#overview"
         isFSD = check_autopilot(result)
-        output_string = f"{vin}\t{warranty_vehicle}\t{est_total_cost}\t{transportation_fee}\t{transportation_fee + est_total_cost}\t{odometer}\t{link}\t{isFSD}"
+        output_string = f"{vin}\t{warranty_vehicle}\t{est_total_cost}\t{transportation_fee}\t{transportation_fee + est_total_cost}\t{odometer}\t{isFSD}\t{link}"
         t_out_file.write(output_string + '\n')
 
         # Print the extracted attributes
