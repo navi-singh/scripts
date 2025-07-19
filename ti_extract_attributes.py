@@ -42,18 +42,23 @@ headers = {
     'Sec-Fetch-User': '?1'
 }
 
-resp = requests.get(url, headers=headers, timeout=5)
-data = resp.json()
+# resp = requests.get(url, headers=headers, timeout=5)
+# data = resp.json()
+with open('tdata.txt', 'r') as file:
+    data = json.load(file)
 
-data['results'] = [result for result in data['results'] if datetime.strptime(
-    result['ActualGAInDate'], '%Y-%m-%dT%H:%M:%S.%f') > datetime.strptime('2023-06-15T12:07:23.000000', '%Y-%m-%dT%H:%M:%S.%f')]
-# data['results'].sort(key=lambda x: datetime.strptime(
-#     x['ActualGAInDate'], '%Y-%m-%dT%H:%M:%S.%f'), reverse=True)
+data['results'] = [
+    result for result in data['results']
+    if result.get('OriginalInCustomerGarageDate') and datetime.strptime(
+        result['OriginalInCustomerGarageDate'].split('.')[0], '%Y-%m-%dT%H:%M:%S'
+    ) > datetime.strptime('2024-10-23T00:00:00', '%Y-%m-%dT%H:%M:%S')
+]
 
 # Calculate the CostToOwn for each result
 for result in data['results']:
-    est_total_cost = result['CashDetails']['cash']['estTotalCost']
-    transportation_fee = result['TransportationFee']
+    # est_total_cost = result['CashDetails']['cash']['estTotalCost']
+    est_total_cost = result['PurchasePrice']
+    transportation_fee = 0 #result['TransportationFee']
     result['CostToOwn'] = est_total_cost + transportation_fee
 
 data['results'].sort(key=lambda x: x['CostToOwn'])
@@ -81,12 +86,13 @@ with open(output_file, 'w') as t_out_file:
 
         # actual_ga_in_date = result['ActualGAInDate']
         warranty_vehicle = f"{convert_date(result['WarrantyData']['WarrantyVehicleExpDate'])} -> {convert_date(result['WarrantyData']['WarrantyBatteryExpDate'])}"
-        est_total_cost = result['CashDetails']['cash']['estTotalCost']
-        transportation_fee = result['TransportationFee']
+        est_total_cost = result['PurchasePrice']
+        # transportation_fee = result['TransportationFee']
         odometer = result['Odometer']
         link = f"https://www.tesla.com/my/order/{vin}#overview"
         isFSD = check_autopilot(result)
-        output_string = f"{vin}\t{warranty_vehicle}\t{est_total_cost}\t{transportation_fee}\t{transportation_fee + est_total_cost}\t{odometer}\t{isFSD}\t{link}"
+        state = result['StateProvince']
+        output_string = f"{vin}\t{warranty_vehicle}\t{est_total_cost}\t{transportation_fee + est_total_cost}\t{state}\t{odometer}\t{isFSD}\t{link}"
         t_out_file.write(output_string + '\n')
 
         # Print the extracted attributes
